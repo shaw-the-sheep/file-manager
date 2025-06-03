@@ -1,0 +1,247 @@
+MyWindow:
+    orientation: "vertical"
+    WindowManager:
+        id:manager
+        FileExplorerWindow:
+        PDFWindow:
+        AudioFileWindow:
+        VideoWindow:
+        ImageWindow:
+
+
+    MDBoxLayout:
+        orientation: "horizontal"
+        size_hint: 1, None
+        height: "50dp"
+        spacing: "10dp"
+        pos_hint: {"x": 0.01}
+
+        MDLabel:
+            text: "Activate hand motion: "
+            font_size: 18
+            size_hint: None, 0.9
+            width: "150dp"
+
+        MDSwitch:
+            size_hint: None, None
+            width: "64dp"
+            height: "48dp"
+            pos_hint: {"center_y": 0.35}
+            active: True
+
+
+<AudioFileWindow>:
+    name: "audio"
+    MDBoxLayout:
+        orientation: "vertical"
+        canvas.before:
+            Color:
+                rgba: 0.9, 0.9, 0.9, 1  # Light gray background
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        MDBoxLayout:
+            size_hint_y: None
+            height: "40dp"
+            orientation: "horizontal"
+            MyButton:
+            MyLabel:
+                text: "Audio player"
+        MyLabel:
+            text: "The file name is: audio"
+        MDBoxLayout:
+            orientation: "horizontal"
+            MDIconButton:
+                icon: "play"
+                size_hint: None, None
+                size: "40dp", "40dp"
+                pos_hint: {"center_y": 0.5}
+                on_press: root.play()
+
+            MDIconButton:
+                icon: "stop"
+                size_hint: None, None
+                size: "40dp", "40dp"
+                pos_hint: {"center_y": 0.5}
+                on_press: root.stop()
+
+            MDSlider:
+                orientation: "horizontal"
+                min: 0
+                max: root.audio_length
+                value: root.current_time_in_seconds
+                step: 1
+                siz_hint_y: None
+                height: "40dp"
+                value_track: True
+                value_track_color: (150/255, 60/255, 10/255, 1)
+                size_hint_x: 1
+                on_touch_up: root.jump_to(self, args[1])
+
+            MyLabel:
+                text: root.current_time
+                size_hint_x: None
+                pos_hint: {"center_y": 0.5}
+
+            MyLabel:
+                text: root.duration
+                size_hint_x: None
+                pos_hint: {"center_y": 0.5}
+
+            MDSlider:
+                orientation: "vertical"
+                min: 0
+                max: 1
+                step: 0.01
+                siz_hint_x: .1
+                on_value: root.change_volume(self)
+                value: .5
+
+<PDFWindow>:
+    name: "pdf"
+    MDBoxLayout:
+        orientation: "vertical"
+        canvas.before:
+            Color:
+                rgba: 0.9, 0.9, 0.9, 1  # Light gray background
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        MDBoxLayout:
+            size_hint_y: None
+            height: "40dp"
+            orientation: "horizontal"
+            MyButton:
+                on_release: root.delete_tmp()
+            MyLabel:
+                text: "PDF viewer"
+        MyLabel:
+            text: "The file name is:" + root.filename + ", page number: " + str(root.index)
+
+        NavBtn:
+            id: prev
+            icon: "arrow-up"
+            on_press:
+                root.previous_page()
+
+        ScrollView:
+            id: scroll
+            size_hint: 1, 1
+            scroll_type: ['content']
+            MDBoxLayout:
+                size_hint_y: None
+                height: dp(root.h)
+                Image:
+                    id: pdf_page
+                    size_hint_y: None
+                    height: dp(root.h)
+                    allow_stretch: True
+                    keep_ratio: True
+                    source: root.page_path
+
+        NavBtn:
+            id: next
+            icon: "arrow-down"
+            on_press:
+                root.next()
+
+<VideoWindow>:
+    name: "video"
+    MDBoxLayout:
+        id: layout
+        orientation: "vertical"
+        canvas.before:
+            Color:
+                rgba: 0.9, 0.9, 0.9, 1  # Light gray background
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        MDBoxLayout:
+            size_hint_y: None
+            height: "40dp"
+            orientation: "horizontal"
+            MyButton:
+                on_press:
+                    root.stop_video(self)
+                    app.button_animation(self)
+            MyLabel:
+                text: "Video player"
+        MyLabel:
+            text: "The file name is: " + root.filename
+
+        VideoPlayer:
+            id: video_player
+            source: root.filepath
+            state: root.state
+
+<ImageWindow>:
+    name: "image"
+    MDBoxLayout:
+        orientation: "vertical"
+        canvas.before:
+            Color:
+                rgba: 0.9, 0.9, 0.9, 1  # Light gray background
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        MDBoxLayout:
+            size_hint_y: None
+            height: "40dp"
+            orientation: "horizontal"
+            MyButton:
+            MyLabel:
+                text: "Image viewer"
+        MyLabel:
+            text: "The file name is: " + root.filename
+        Image:
+            id: "image_display"
+            allow_stretch: True
+            keep_ratio: True
+            size_hint: 1, 1
+            source: root.filepath
+
+<FileExplorerWindow>:
+    name: "explorer"
+    MDBoxLayout:
+        orientation: "vertical"
+        MyLabel:
+            text: "File Explorer Improved"
+
+        MyLabel:
+            text: "Current directory is: Desktop" #needs to change dynamically the current directory name
+
+        FileChooserListView:
+            canvas.before:
+                Color:
+                    rgba: 0, 0, 0, 1  # Light gray background
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+            path: "C:/Users/User/Desktop/"
+            scroll_type: ["content", "bars"]
+            multiselect: False
+            color: 0, 0, 0, 1
+            on_selection: root.choose_file(self)
+
+
+<MyButton@MDIconButton>:
+    icon: "arrow-left"
+    size_hint: None, None
+    size: "40dp", "40dp"
+    on_press: app.button_animation(self)
+
+<MyLabel@MDLabel>:
+    size_hint_y: None
+    height: "40dp"
+    font_size: 20
+    halign: 'center'
+    valign: 'middle'
+    text_size: self.size
+    size_hint: 1, None
+    height: "40dp"
+
+<NavBtn@MDIconButton>:
+    size_hint: 1, None
+    height: "50dp"
+    style: "elevated"
+
